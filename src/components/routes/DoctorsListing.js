@@ -4,12 +4,14 @@ import Title from '../text/Title';
 import { connect } from 'react-redux';
 import { PageContentLayout } from '../layout/PageContentLayout';
 import Modal from 'react-modal';
-import { addDoctor } from '../../actions';
+import { addDoctor, giveAccess, revokeAccess } from '../../actions';
 
 
-const mapStateToProps = state => ({ doctors: state.doctorsStore.items, contract: state.ethStore.deplyedContract })
+const mapStateToProps = state => ({ doctors: state.doctorsStore.items, contract: state.ethStore.deployedContract, myAccount: state.ethStore.account })
 const mapDispatchToProps = dispatch => ({
-    addDoctor: (contract, address) => dispatch(addDoctor(contract, address)),
+    addDoctor: (contract, address, myAccount) => dispatch(addDoctor(contract, address, myAccount)),
+    grant: (contract, address, myAccount) => dispatch(giveAccess(contract, address, myAccount)),
+    revoke: (contract, address, myAccount) => dispatch(revokeAccess(contract, address, myAccount)),
 })
 
 const customStyles = {
@@ -28,15 +30,20 @@ export class PDoctorsListing extends React.Component {
         super(props);
         this.state = {
             modalIsOpen: false,
-
+            input: ''
         };
     }
     openModal = () => {
+        console.log(this.props)
         this.setState({ modalIsOpen: true })
     }
 
     closeModal = () => {
         this.setState({ modalIsOpen: false })
+    }
+
+    handleChange = (e) =>  {
+        this.setState({ input: e.target.value });
     }
 
 
@@ -54,14 +61,15 @@ export class PDoctorsListing extends React.Component {
                 >
                     <button onClick={this.closeModal}>close</button>
                     <form>
-                        <input />
-                        <button onClick={this.props.addDoctor}>Add</button>
+                        <input onChange={ this.handleChange }/>
+                       
                     </form>
+                    <button onClick={ () => this.props.addDoctor(this.props.contract, this.state.input, this.props.myAccount)}>Add</button>
 
                 </Modal>
-                <PageContentLayout isRendering={this.props.doctors.length} unAvailabilityText="No users">
+                <PageContentLayout isRendering={Object.keys(this.props.doctors).length} unAvailabilityText="No doctors">
 
-                    <DoctorsTable doctors={this.props.doctors} />
+                    <DoctorsTable doctors={this.props.doctors} onGrantClick={ (doctorAddress) => this.props.grant(this.props.contract, doctorAddress, this.props.myAccount)}  onRevokeClick={ (doctorAddress) => this.props.revoke(this.props.contract, doctorAddress, this.props.myAccount)} />
 
                 </PageContentLayout>
 

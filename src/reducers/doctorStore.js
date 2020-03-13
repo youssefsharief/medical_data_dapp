@@ -1,20 +1,14 @@
+import { createReducer } from '@reduxjs/toolkit'
+
 const initialState = {
-    items: [
-        {address: 'a', haveAccess: true},
-        {address: 'b', haveAccess: false}
-    ]
+    items: {}
 }
 
-export const doctorsStore = (state = initialState, action) => {
-    switch (action.type) {
-        case 'SAVE_DOCTORS' : {
-            return {
-                accounts: action.payload
-            }
-        }
-        default:
-            return state
+export const doctorsStore = createReducer(initialState, {
+    UPDATE_DOCTOR_STATUS: (state, action) => {
+      state.items[action.payload.address] = action.payload.props
+    },
+    SAVE_DOCTORS : (state, action) => {
+        state.items= action.payload
     }
-}
-
-
+})

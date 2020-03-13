@@ -44,18 +44,14 @@ class Appa extends Component {
     await this.getWeb3Provider()
     const web3 = window.web3;
     const accounts = await web3.eth.getAccounts();
-    console.log(accounts)
     this.props.saveAccounts(accounts)
     const networkId = await web3.eth.net.getId()
-    console.log(networkId)
-    console.log(Medical)
-    console.log(Medical.networks)
-    const networkData = Medical.networks[5777];
+    const networkData = Medical.networks[networkId];
     if (networkData) {
       const deployedContract = new web3.eth.Contract(Medical.abi, networkData.address);
       console.log(deployedContract.methods)
       this.props.getDoctors(deployedContract)
-      this.props.setEthState({deployedContract, account: accounts[1]})
+      this.props.setEthState({deployedContract, account: accounts[0]})
       // const doctors = ['0x0176507cc937Fba82CA648Da8E8c92693be3C666', '0x7F21F4FA0803A8B015B7d01Cad832a1c0153019c', '0xC81542a3Dd3c6630Bda3dd0a3b22C9b44C947FC4']
       // const gasAmount = await deployedContract.methods.registerDoctors(doctors).estimateGas({ from: accounts[0] })
 

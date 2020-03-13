@@ -1,40 +1,10 @@
-
-// function fetchSecretSauce() {
-//     return fetch('https://www.google.com/search?q=secret+sauce');
-// }
-
-// function makeASandwich(forPerson, secretSauce) {
-//     return {
-//         type: 'MAKE_SANDWICH',
-//         forPerson,
-//         secretSauce,
-//     };
-// }
-
-// function apologize(fromPerson, toPerson, error) {
-//     return {
-//         type: 'APOLOGIZE',
-//         fromPerson,
-//         toPerson,
-//         error,
-//     };
-// }
-
-// function withdrawMoney(amount) {
-//     return {
-//         type: 'WITHDRAW',
-//         amount,
-//     };
-// }
-export function getDoctors(deployedContract) {
+export function getDoctors(deployedContract, address) {
     return async function (dispatch) {
         const addresses = await deployedContract.methods.returnDoctorsAddresses().call()
-        const count = addresses.length
-        console.log(count)
-        const doctors = []
+        const doctors = {}
         for (let i = 0; i < addresses.length; i++) {
-            const haveAccess = deployedContract.methods.doesDoctorHaveAccess(i).call()
-            doctors.push({ address: addresses, haveAccess })
+            const haveAccess = await deployedContract.methods.doesDoctorHaveAccess(addresses[i]).call()
+            doctors[addresses[i]] = {haveAccess}
         }
         console.log(doctors)
         return dispatch({type: 'SAVE_DOCTORS', payload: doctors})
@@ -42,11 +12,29 @@ export function getDoctors(deployedContract) {
 }
 
 
-export function addDoctor(deployedContract, address) {
+export function addDoctor(deployedContract, address, myAccount) {
     return async function (dispatch) {
-        const gasAmount = await deployedContract.methods.registerDoctor(address).estimateGas()
-        deployedContract.methods.registerDoctor(address).send({gas: gasAmount}).once('receipt', (receipt)=> {
+        const gasAmount = await deployedContract.methods.registerDoctor(address).estimateGas({from: myAccount})
+        deployedContract.methods.registerDoctor(address).send({gas: gasAmount, from: myAccount}).once('receipt', (receipt)=> {
             return dispatch(getDoctors(deployedContract))
+          })
+    };
+}
+
+export function giveAccess(deployedContract, address, myAccount) {
+    return async function (dispatch) {
+        const gasAmount = await deployedContract.methods.grantAccessToDoctor(address).estimateGas({from: myAccount})
+        deployedContract.methods.grantAccessToDoctor(address).send({gas: gasAmount, from: myAccount}).once('receipt', (receipt)=> {
+            return dispatch({type: 'UPDATE_DOCTOR_STATUS', payload: {address, props: {haveAccess: true} } } )
+          })
+    };
+}
+
+export function revokeAccess(deployedContract, address, myAccount) {
+    return async function (dispatch) {
+        const gasAmount = await deployedContract.methods.revokeAccessFromDoctor(address).estimateGas({from: myAccount})
+        deployedContract.methods.revokeAccessFromDoctor(address).send({gas: gasAmount, from: myAccount}).once('receipt', (receipt)=> {
+            return dispatch({type: 'UPDATE_DOCTOR_STATUS', payload: {address, props: {haveAccess: false} } } )
           })
     };
 }
