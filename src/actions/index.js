@@ -1,40 +1,41 @@
-export function getDoctors(deployedContract, address) {
+import * as eUtil from 'ethereumjs-util'
+
+export function getDoctors(deployedContract) {
     return async function (dispatch) {
-        const addresses = await deployedContract.methods.returnDoctorsAddresses().call()
+        const pubKeys = await deployedContract.methods.returnDoctorsPubKeys().call()
         const doctors = {}
-        for (let i = 0; i < addresses.length; i++) {
-            const haveAccess = await deployedContract.methods.doesDoctorHaveAccess(addresses[i]).call()
-            doctors[addresses[i]] = {haveAccess}
+        for (let i = 0; i < pubKeys.length; i++) {
+            const haveAccess = await deployedContract.methods.doesDoctorHaveAccess(pubKeys[i]).call()
+            doctors[pubKeys[i]] = {haveAccess, address: eUtil.publicToAddress(Buffer.from(pubKeys[i], 'hex')).toString('hex')   }
         }
         console.log(doctors)
         return dispatch({type: 'SAVE_DOCTORS', payload: doctors})
     };
 }
 
-
-export function addDoctor(deployedContract, address, myAccount) {
+export function addDoctor(deployedContract, address, myAccountAddress) {
     return async function (dispatch) {
-        const gasAmount = await deployedContract.methods.registerDoctor(address).estimateGas({from: myAccount})
-        deployedContract.methods.registerDoctor(address).send({gas: gasAmount, from: myAccount}).once('receipt', (receipt)=> {
+        const gasAmount = await deployedContract.methods.registerDoctor(address).estimateGas({from: myAccountAddress})
+        deployedContract.methods.registerDoctor(address).send({gas: gasAmount, from: myAccountAddress}).once('receipt', (receipt)=> {
             return dispatch(getDoctors(deployedContract))
           })
     };
 }
 
-export function giveAccess(deployedContract, address, myAccount) {
+export function giveAccess(deployedContract, pubKey, myAccountAddress) {
     return async function (dispatch) {
-        const gasAmount = await deployedContract.methods.grantAccessToDoctor(address).estimateGas({from: myAccount})
-        deployedContract.methods.grantAccessToDoctor(address).send({gas: gasAmount, from: myAccount}).once('receipt', (receipt)=> {
-            return dispatch({type: 'UPDATE_DOCTOR_STATUS', payload: {address, props: {haveAccess: true} } } )
+        const gasAmount = await deployedContract.methods.grantAccessToDoctor(pubKey).estimateGas({from: myAccountAddress})
+        deployedContract.methods.grantAccessToDoctor(pubKey).send({gas: gasAmount, from: myAccountAddress}).once('receipt', (receipt)=> {
+            return dispatch({type: 'GIVE_ACCESS', pubKey } )
           })
     };
 }
 
-export function revokeAccess(deployedContract, address, myAccount) {
+export function revokeAccess(deployedContract, pubKey, myAccountAddress) {
     return async function (dispatch) {
-        const gasAmount = await deployedContract.methods.revokeAccessFromDoctor(address).estimateGas({from: myAccount})
-        deployedContract.methods.revokeAccessFromDoctor(address).send({gas: gasAmount, from: myAccount}).once('receipt', (receipt)=> {
-            return dispatch({type: 'UPDATE_DOCTOR_STATUS', payload: {address, props: {haveAccess: false} } } )
+        const gasAmount = await deployedContract.methods.revokeAccessFromDoctor(pubKey).estimateGas({from: myAccountAddress})
+        deployedContract.methods.revokeAccessFromDoctor(pubKey).send({gas: gasAmount, from: myAccountAddress}).once('receipt', (receipt)=> {
+            return dispatch({type: 'REVOKE_ACCESS', pubKey } )
           })
     };
 }

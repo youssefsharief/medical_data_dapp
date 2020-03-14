@@ -6,35 +6,31 @@ contract Medical{
     constructor() public{
         owner = msg.sender;
     }
-    mapping(address => bool) public doesDoctorHaveAccess;
-    address[] public doctorsAddresses;
+    mapping(string => bool) public doesDoctorHaveAccess;
+    string[] public doctorsPubKeys;
     address private document;
-    function accessDocument ( address _patientID ) public view   userExists(_patientID) returns(address ){
-        require (doesDoctorHaveAccess [msg.sender] == true, "You do not have an access to this patient's medical records !");
-        return document;
-    }
 
-    function returnDoctorsAddresses() public view returns(address[] memory) {
-        return doctorsAddresses;
+    function returnDoctorsPubKeys() public view returns(string[] memory) {
+        return doctorsPubKeys;
     }
 
 
-    function grantAccessToDoctor ( address a ) public userExists(a) {
+    function grantAccessToDoctor ( string memory a ) public {
         doesDoctorHaveAccess[a] = true;
     }
 
-    function revokeAccessFromDoctor ( address a )  public userExists(a) {
+    function revokeAccessFromDoctor ( string memory a )  public {
         doesDoctorHaveAccess[a] = false;
     }
 
 
-    function registerDoctor ( address a  )  public {
-        doctorsAddresses.push(a);
+    function registerDoctor ( string memory a   )  public {
+        doctorsPubKeys.push(a);
         doesDoctorHaveAccess[a] = false;
     }
 
-    function ListOfDoctors(address _patientID) public view  userExists(_patientID) returns(address[] memory) {
-        return doctorsAddresses;
+    function ListOfDoctors() public view  returns(string[] memory) {
+        return doctorsPubKeys;
     }
 
     modifier userExists(address _userId) {

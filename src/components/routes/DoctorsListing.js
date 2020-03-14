@@ -7,11 +7,11 @@ import Modal from 'react-modal';
 import { addDoctor, giveAccess, revokeAccess } from '../../actions';
 
 
-const mapStateToProps = state => ({ doctors: state.doctorsStore.items, contract: state.ethStore.deployedContract, myAccount: state.ethStore.account })
+const mapStateToProps = state => ({ doctors: state.doctorsStore.items, contract: state.ethStore.deployedContract, myAccountAddress: state.ethStore.account })
 const mapDispatchToProps = dispatch => ({
-    addDoctor: (contract, address, myAccount) => dispatch(addDoctor(contract, address, myAccount)),
-    grant: (contract, address, myAccount) => dispatch(giveAccess(contract, address, myAccount)),
-    revoke: (contract, address, myAccount) => dispatch(revokeAccess(contract, address, myAccount)),
+    addDoctor: (contract, pubkey, myAccountAddress) => dispatch(addDoctor(contract, pubkey, myAccountAddress)),
+    grant: (contract, pubkey, myAccountAddress) => dispatch(giveAccess(contract, pubkey, myAccountAddress)),
+    revoke: (contract, pubkey, myAccountAddress) => dispatch(revokeAccess(contract, pubkey, myAccountAddress)),
 })
 
 const customStyles = {
@@ -64,12 +64,12 @@ export class PDoctorsListing extends React.Component {
                         <input onChange={ this.handleChange }/>
                        
                     </form>
-                    <button onClick={ () => this.props.addDoctor(this.props.contract, this.state.input, this.props.myAccount)}>Add</button>
+                    <button onClick={ () => this.props.addDoctor(this.props.contract, this.state.input, this.props.myAccountAddress)}>Add</button>
 
                 </Modal>
                 <PageContentLayout isRendering={Object.keys(this.props.doctors).length} unAvailabilityText="No doctors">
 
-                    <DoctorsTable doctors={this.props.doctors} onGrantClick={ (doctorAddress) => this.props.grant(this.props.contract, doctorAddress, this.props.myAccount)}  onRevokeClick={ (doctorAddress) => this.props.revoke(this.props.contract, doctorAddress, this.props.myAccount)} />
+                    <DoctorsTable doctors={this.props.doctors} onGrantClick={ (doctorPubKey) => this.props.grant(this.props.contract, doctorPubKey, this.props.myAccountAddress)}  onRevokeClick={ (doctorPubKey) => this.props.revoke(this.props.contract, doctorPubKey, this.props.myAccountAddress)} />
 
                 </PageContentLayout>
 

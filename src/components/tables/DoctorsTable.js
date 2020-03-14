@@ -6,26 +6,28 @@ export const DoctorsTable = ({ doctors, onGrantClick, onRevokeClick }) => (
     <TableLayout
         TableHeaders={() =>
             <React.Fragment>
+                <th>Public Key</th>
                 <th>Address</th>
                 <th>Access</th>
             </React.Fragment>
         }
 
 
-        TableBodyContent={() => Object.keys(doctors).map((address, index) =>
+        TableBodyContent={() => Object.keys(doctors).map((pubKey, index) =>
             (
                 <tr key={index}>
-                    <td>{address}</td>
+                    <td>{pubKey}</td>
+                    <td>{doctors[pubKey].address}</td>
 
 
                     <td className="text-center ">
                         {
-                            doctors[address].haveAccess ?
-                                <button className="link" onClick={() => onRevokeClick(address)}>
+                            doctors[pubKey].haveAccess ?
+                                <button className="link" onClick={() => onRevokeClick(pubKey)}>
                                     <i className="fa fa-thumbs-down text-danger"> </i>
                                 </button>
                                 :
-                                <button className="link" onClick={() => onGrantClick(address)}>
+                                <button className="link" onClick={() => onGrantClick(pubKey)}>
                                     <i className="fa fa-thumbs-down text-success"> </i>
                                 </button>
                         }

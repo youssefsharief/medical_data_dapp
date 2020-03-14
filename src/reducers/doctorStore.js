@@ -5,10 +5,13 @@ const initialState = {
 }
 
 export const doctorsStore = createReducer(initialState, {
-    UPDATE_DOCTOR_STATUS: (state, action) => {
-      state.items[action.payload.address] = action.payload.props
+    GIVE_ACCESS: (state, action) => {
+        state.items[action.pubKey].haveAccess = true
     },
-    SAVE_DOCTORS : (state, action) => {
-        state.items= action.payload
+    REVOKE_ACCESS: (state, action) => {
+        state.items[action.pubKey].haveAccess = false
+    },
+    SAVE_DOCTORS: (state, action) => {
+        state.items = action.payload
     }
 })
