@@ -43,6 +43,7 @@
     "not op_mini all"
   ],
   "devDependencies": {
+    "ethereumjs-util": "^6.2.0",
     "solc": "^0.5.16"
   }
 }
