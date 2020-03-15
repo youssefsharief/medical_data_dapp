@@ -33,6 +33,7 @@ export const PNavbar = () => (
         {true ? (
           <React.Fragment>
             <NavBarLink to="/doctors" label="Doctors" />
+            <NavBarLink to="/document" label="Document" />
           </React.Fragment>
         ) : (
           <React.Fragment>

@@ -3,20 +3,22 @@ import './App.css';
 import Addressbar from './Addressbar'
 import { BrowserRouter, Route } from 'react-router-dom';
 import { DoctorsListing } from './routes/DoctorsListing';
-import { OldView } from './routes/OldView';
 import { connect } from 'react-redux';
 import Web3 from 'web3';
 import Medical from '../abis/Medical'
 import { Navbar } from './layout/Navbar'
-import { getDoctors } from '../actions';
+import { getDoctors, getFileHash } from '../actions';
+import { DocumentPage } from './routes/DocumentPage';
+import { ErrorModal } from './core/ErrorModal';
 
 
 
-const mapStateToProps = state => ({ account: state.ethStore.account })
+const mapStateToProps = state => ({ account: state.ethStore.account, contract: state.ethStore.deployedContract })
 const mapDispatchToProps = dispatch => ({
   saveAccounts: (payload) => dispatch({ type: 'SAVE_ACCOUNT', payload }),
-  getDoctors: (deployedContract) => dispatch(getDoctors(deployedContract)),
-  setEthState: obj => dispatch({type: 'SET_ETH_STATE', payload: obj})
+  getDoctors: (deployedContract, account) => dispatch(getDoctors(deployedContract, account)),
+  setEthState: obj => dispatch({type: 'SET_ETH_STATE', payload: obj}),
+  getFileHash: (contract) => dispatch(getFileHash(contract))
 })
 
 
@@ -49,20 +51,9 @@ class Appa extends Component {
     const networkData = Medical.networks[networkId];
     if (networkData) {
       const deployedContract = new web3.eth.Contract(Medical.abi, networkData.address);
-      console.log(deployedContract.methods)
-      this.props.getDoctors(deployedContract)
       this.props.setEthState({deployedContract, account: accounts[0]})
-      // const doctors = ['0x0176507cc937Fba82CA648Da8E8c92693be3C666', '0x7F21F4FA0803A8B015B7d01Cad832a1c0153019c', '0xC81542a3Dd3c6630Bda3dd0a3b22C9b44C947FC4']
-      // const gasAmount = await deployedContract.methods.registerDoctors(doctors).estimateGas({ from: accounts[0] })
-
-      // deployedContract.methods.registerDoctors(doctors).send({ from: accounts[0], gas: gasAmount })
-      // const items = []
-      // for (var i = 1; i <= totalNumber; i++) {
-      //   const item = await deployedContract.methods.items(i).call();
-      //   items.push(item)
-      // }
-      // this.props
-      // return Observable.of({items, totalNumber, deployedContract})
+      this.props.getDoctors(deployedContract, accounts[0])
+      this.props.getFileHash(this.props.contract)
     } else {
       window.alert('Contract is not found in your blockchain.')
     }
@@ -72,13 +63,16 @@ class Appa extends Component {
 
   render() {
     return (
+      
       <BrowserRouter>
-        <Navbar />
+          <Navbar />
+          <ErrorModal></ErrorModal>
+          <DocumentPage></DocumentPage>
         <div>
           <Addressbar account={this.props.account} />
         </div>
         <Route path="/doctors" component={DoctorsListing} />
-        <Route path="/main" component={OldView} />
+        {/* <Route path="/documnent" component={DocumentPage} /> */}
       </BrowserRouter>
     );
   }
