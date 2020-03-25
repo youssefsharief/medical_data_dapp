@@ -13,7 +13,7 @@ export function getDoctors(deployedContract, myAccountAddress) {
             const doctors = {}
             for (let i = 0; i < pubKeys.length; i++) {
                 const haveAccess = await deployedContract.methods.doesDoctorHaveAccess(pubKeys[i]).call({ from: myAccountAddress })
-                const  doctorAddress = publicToAddress(pubKeys[i])
+                const doctorAddress = publicToAddress(pubKeys[i])
                 console.log(myAccountAddress)
                 console.log(doctorAddress)
                 doctors[pubKeys[i]] = { haveAccess, address: doctorAddress }
@@ -87,35 +87,42 @@ export function revokeAccess(deployedContract, doctorPubKey, myAccountAddress) {
 }
 
 
-export function dealWithDocument(deployedContract, myAccountAddress, doctors) {
+export function dealWithDocument(deployedContract, myAccountAddress, doctors, dataUrl) {
     return async function (dispatch) {
         console.log(doctors)
-        const secretKey = Math.random().toString(36).substring(7)
+        const secretKey = Math.random().toString(36).substring(10)
         console.log('random', secretKey)
-        const secretKeys = {}
-        Object.keys(doctors).forEach(async publicKey => secretKeys[publicKey] =  await EthCrypto.encryptWithPublicKey(publicKey, secretKey))
-        console.log('secret keys', secretKeys)
-        // try {
-        //     
-        //     const encryptedString = AES.encrypt(this.state.dataUrl, secretKey).toString()
-        //     const decryptedString = AES.decrypt(encryptedString, secretKey).toString(enc.Utf8)
-        //     console.log(decryptedString)
-        //     ipfs.files.add(Buffer(encryptedString), (error, result) => {
-        //       if (error) {
-        //         console.log(error);
-        //         return;
-        //       }
-        //       console.log("File added succesfully");
-        //       console.log("IPFS result", result);
+        const encryptedFileAsString = AES.encrypt(dataUrl, secretKey).toString()
+        // const decryptedString = AES.decrypt(encryptedFileAsString, secretKey).toString(enc.Utf8)
+        // console.log(decryptedString)
+        ipfs.files.add(Buffer(encryptedFileAsString), (error, result) => {
+            if (error) {
+                console.log(error);
+                return;
+            }
+            console.log("File added succesfully");
+            console.log("IPFS result", result);
+            dispatch(storeFileHash(deployedContract, myAccountAddress, result[0].hash));
+        });
+        
+        const ecryptedSecretsArr = await Promise.all(Object.keys(doctors).map(async publicKey => EthCrypto.encryptWithPublicKey(publicKey, secretKey)))
+        const secretKeys = Object.keys(doctors).reduce((obj, k, i) => ({...obj, [k]: ecryptedSecretsArr[i] }), {})
 
-              
+        console.log('resolved', ecryptedSecretsArr)
+        console.log('secret keys', secretKeys)
+
         
-        //       storeFileHash(deployedContract, myAccountAddress, result[0].hash);
-        //     });
-        
-        // } catch (e) {
-        //     return dispatch({ type: 'OPEN_ERROR_MODAL', message: 'EEEEEEE' })
-        // }
+        const stringifiedSecretKeys = JSON.stringify(secretKeys)
+        console.log('stringifiedSecretKeys', stringifiedSecretKeys)
+        ipfs.files.add(Buffer(stringifiedSecretKeys), (error, result) => {
+            if (error) {
+                console.log(error);
+                return;
+            }
+            console.log("Secret Object added succesfully");
+            console.log("IPFS result", result);
+            dispatch(storeSecretObjectHash(deployedContract, myAccountAddress, result[0].hash));
+        });
     };
 }
 
@@ -126,11 +133,23 @@ function storeFileHash(deployedContract, myAccountAddress, hash) {
             await deployedContract.methods.storeFileHash(hash).send({ gas: gasAmount, from: myAccountAddress })
             return dispatch({ type: 'STORE_FILE_HASH', hash })
         } catch (e) {
-            return dispatch({ type: 'OPEN_ERROR_MODAL', message: 'Can\'t store your document hash in the smart contract. Make sure you are the owner' })
+            return dispatch({ type: 'OPEN_ERROR_MODAL', message: 'Can\'t store your document hash in the smart contract' })
         }
     };
 }
 
+
+function storeSecretObjectHash(deployedContract, myAccountAddress, hash) {
+    return async function (dispatch) {
+        try {
+            const gasAmount = await deployedContract.methods.storeSecretObjectHash(hash).estimateGas({ from: myAccountAddress })
+            await deployedContract.methods.storeSecretObjectHash(hash).send({ gas: gasAmount, from: myAccountAddress })
+            return dispatch({ type: 'SECRET_OBJECT_HASH_STORED', hash })
+        } catch (e) {
+            return dispatch({ type: 'OPEN_ERROR_MODAL', message: 'Can\'t store your secret object hash in the smart contract' })
+        }
+    };
+}
 
 export function getFileHash(deployedContract) {
     return async function (dispatch) {
@@ -140,7 +159,20 @@ export function getFileHash(deployedContract) {
                 dispatch({ type: 'STORE_FILE_HASH', hash })
             }
         } catch (e) {
-            return dispatch({ type: 'OPEN_ERROR_MODAL', message: 'Can\'t get your document\'s hash. Make sure you are the owner' })
+            return dispatch({ type: 'OPEN_ERROR_MODAL', message: 'Can\'t get your document\'s hash' })
+        }
+    };
+}
+
+export function getSecretObjectHash(deployedContract) {
+    return async function (dispatch) {
+        try {
+            const hash = await deployedContract.methods.getSecretObjectHash().call()
+            if (hash) {
+                dispatch({ type: 'STORE_SECRET_OBJECT_HASH', hash })
+            }
+        } catch (e) {
+            return dispatch({ type: 'OPEN_ERROR_MODAL', message: 'Can\'t get your secret object hash' })
         }
     };
 }

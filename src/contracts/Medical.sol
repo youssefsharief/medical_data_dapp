@@ -6,7 +6,8 @@ contract Medical{
     mapping(string => bool) public doesDoctorHaveAccess;
     mapping(string => string) public encryptedSecretKey;
     string[] private doctorsPubKeys;
-    string private documentHash;
+    string private fileHash;
+    string private secretObjectHash;
 
     function returnDoctorsPubKeys() public view returns(string[] memory)  {
         return doctorsPubKeys;
@@ -25,11 +26,19 @@ contract Medical{
     }
 
     function storeFileHash ( string memory a )  public isOwner(){
-        documentHash = a;
+        fileHash = a;
+    }
+
+    function storeSecretObjectHash ( string memory a )  public isOwner(){
+        secretObjectHash = a;
     }
 
     function getFileHash () public isOwner() view  returns(string memory) {
-        return documentHash;
+        return fileHash;
+    }
+
+    function getSecretObjectHash () public isOwner() view  returns(string memory) {
+        return secretObjectHash;
     }
 
     function registerDoctor ( string memory a   )  public isOwner(){

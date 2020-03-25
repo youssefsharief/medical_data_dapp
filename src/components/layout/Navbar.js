@@ -41,7 +41,7 @@ export const PNavbar = ({ account, identity }) => (
             <NavBarLink to="/document" label="My Document" />
           </React.Fragment>
         ) : identity === userType.DOCTOR_WITH_ACCESS ? (
-          <NavBarLink to="/document" label="Patient's Document" />
+          <NavBarLink to="/documentForDoctor" label="Patient's Document" />
           ) : <div></div>
           
           }

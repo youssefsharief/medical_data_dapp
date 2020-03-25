@@ -1,20 +1,13 @@
+import { createReducer } from '@reduxjs/toolkit'
+
 const initialState = {deployedContract:undefined, account: undefined, totalNumber:undefined, items: undefined,  }
 
-export const ethStore = (state = initialState, action) => {
-    switch (action.type) {
-        case 'SAVE_ACCOUNTS' : {
-            return {
-                accounts: action.payload.accounts
-            }
-        }
-        case 'SET_ETH_STATE': {
-            return { ...state, deployedContract: action.payload.deployedContract, account: action.payload.account }
-        }
-        default:
-            return state
-    }
-}
-
-
-
-
+export const ethStore = createReducer(initialState, {
+    SAVE_ACCOUNTS: (state, action) => {
+        state.accounts = action.payload.accounts
+    },
+    SET_ETH_STATE: (state, action) => {
+        state.deployedContract = action.payload.deployedContract
+        state.account= action.payload.account
+    },
+})

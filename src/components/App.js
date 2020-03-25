@@ -6,10 +6,11 @@ import { connect } from 'react-redux';
 import Web3 from 'web3';
 import Medical from '../abis/Medical'
 import { Navbar } from './layout/Navbar'
-import { getDoctors, getFileHash, amIOwner } from '../actions';
+import { getDoctors, getFileHash, amIOwner, getSecretObjectHash } from '../actions';
 import { DocumentPage } from './routes/DocumentPage';
 import { ErrorModal } from './core/ErrorModal';
 import { IdentityPage } from './routes/IdentityPage';
+import { DocumentForDoctorPage } from './routes/DocumentForDoctor';
 
 
 
@@ -19,7 +20,8 @@ const mapDispatchToProps = dispatch => ({
   getDoctors: (deployedContract, account) => dispatch(getDoctors(deployedContract, account)),
   amIOwner: (deployedContract, account) => dispatch(amIOwner(deployedContract, account)),
   setEthState: obj => dispatch({type: 'SET_ETH_STATE', payload: obj}),
-  getFileHash: (contract) => dispatch(getFileHash(contract))
+  getFileHash: (contract) => dispatch(getFileHash(contract)),
+  getSecretObjectHash:  (contract) => dispatch(getSecretObjectHash(contract)),
 })
 
 
@@ -56,6 +58,7 @@ class Appa extends Component {
       this.props.getDoctors(deployedContract, accounts[0])
       this.props.amIOwner(deployedContract, accounts[0])
       this.props.getFileHash(this.props.contract)
+      this.props.getSecretObjectHash(this.props.contract)
     } else {
       window.alert('Contract is not found in your blockchain.')
     }
@@ -72,6 +75,7 @@ class Appa extends Component {
         <Route path="/doctors" component={DoctorsListing} />
         <Route path="/document" component={DocumentPage} />
         <Route path="/identity" component={IdentityPage} />
+        <Route path="/documentForDoctor" component={DocumentForDoctorPage} />
         <Route path='/'>
           <Redirect to="/identity" />
         </Route>
