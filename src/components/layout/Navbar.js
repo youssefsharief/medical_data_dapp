@@ -2,6 +2,7 @@ import React from "react";
 import { NavLink, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import { compose } from "redux";
+import { userType } from "../../types/userType";
 
 const NavBarLink = ({ to, label }) => (
   <li className="nav-item" style={{ marginRight: "20px" }}>
@@ -11,7 +12,7 @@ const NavBarLink = ({ to, label }) => (
   </li>
 );
 
-export const PNavbar = () => (
+export const PNavbar = ({ account, identity }) => (
   <nav className="navbar navbar-expand-lg navbar-light bg-light mb-4">
     <NavLink className="navbar-brand" to="/">
       {" "}
@@ -30,27 +31,28 @@ export const PNavbar = () => (
     </button>
     <div className="collapse navbar-collapse" id="navbarSupportedContent">
       <ul className="navbar-nav mr-auto">
-        {true ? (
+
+
+        <NavBarLink to="/identity" label="Identity" />
+
+        {identity === userType.OWNER ? (
           <React.Fragment>
             <NavBarLink to="/doctors" label="Doctors" />
-            <NavBarLink to="/document" label="Document" />
+            <NavBarLink to="/document" label="My Document" />
           </React.Fragment>
-        ) : (
-          <React.Fragment>
-            <NavBarLink to="/map" label="Login" />
-            <NavBarLink to="/signup" label="Signup" />
-          </React.Fragment>
-        )}
-        {<h1> A  </h1>}
+        ) : identity === userType.DOCTOR_WITH_ACCESS ? (
+          <NavBarLink to="/document" label="Patient's Document" />
+          ) : <div></div>
+          
+          }
       </ul>
+      <small className="text-black"><span id="account">{"Your Address: " + account}</span></small>
     </div>
   </nav>
 );
 
 const mapStateToProps = state => ({
-  // myId: state.authStoreState.id,
-  // isAuthenticated: state.authStoreState.isAuthenticated,
-  // isManager: state.authStoreState.role === "manager"
+  identity: state.identityStore.identity,
 });
 
 const mapDispatchToProps = dispatch => ({

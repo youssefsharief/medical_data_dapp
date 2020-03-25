@@ -4,8 +4,8 @@ import { connect } from 'react-redux';
 
 const customStyles = {
     content: {
-        top: '20%',
-        left: '20%',
+        top: '50%',
+        left: '50%',
         right: 'auto',
         bottom: 'auto',
         marginRight: '-50%',
@@ -29,9 +29,9 @@ export function PErrorModal({onCloseClick, modalErrorMesasge}) {
         contentLabel="Error Modal"
 
     >
-        <button onClick={onCloseClick}>close</button>
+        <button className="btn btn-warning" onClick={onCloseClick}>close</button>
         
-        <h4>{modalErrorMesasge}</h4>
+        <p>{modalErrorMesasge}</p>
 
     </Modal>
     )

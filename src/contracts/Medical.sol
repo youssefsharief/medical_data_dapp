@@ -4,15 +4,20 @@ pragma experimental ABIEncoderV2;
 contract Medical{
     address private owner = msg.sender;
     mapping(string => bool) public doesDoctorHaveAccess;
+    mapping(string => string) public encryptedSecretKey;
     string[] private doctorsPubKeys;
     string private documentHash;
 
-    function returnDoctorsPubKeys() public isOwner() view returns(string[] memory)  {
+    function returnDoctorsPubKeys() public view returns(string[] memory)  {
         return doctorsPubKeys;
     }
 
     function grantAccessToDoctor ( string memory a ) public isOwner() {
         doesDoctorHaveAccess[a] = true;
+    }
+
+    function amIOwner() public view returns(bool) {
+        return msg.sender == owner;
     }
 
     function revokeAccessFromDoctor ( string memory a )  public isOwner() {

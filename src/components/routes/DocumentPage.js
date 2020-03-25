@@ -1,15 +1,11 @@
 import React, { Component } from "react";
-import { storeFileHash } from "../../actions";
+import { dealWithDocument } from "../../actions";
 import { connect } from 'react-redux';
-import { AES, enc } from 'crypto-js';
-
-const ipfsAPI = require("ipfs-api");
-const ipfs = ipfsAPI("ipfs.infura.io", "5001", { protocol: "https" });
 
 
-const mapStateToProps = state => ({ contract: state.ethStore.deployedContract, myAccountAddress: state.ethStore.account, hash: state.documentStore.hash })
+const mapStateToProps = state => ({ contract: state.ethStore.deployedContract, myAccountAddress: state.ethStore.account, hash: state.documentStore.hash, doctors: state.doctorsStore.items, myAddress: state.ethStore.account })
 const mapDispatchToProps = dispatch => ({
-  storeFileHash: (contract, myAccountAddress, hash) => dispatch(storeFileHash(contract, myAccountAddress, hash)),
+  dealWithDocument: (contract, myAccountAddress, doctors) => dispatch(dealWithDocument(contract, myAccountAddress, doctors)),
 })
 
 
@@ -35,19 +31,7 @@ export class PDocumentPage extends Component {
   onSubmit = event => {
     event.preventDefault();
     console.log('this.state.dataUrl', this.state.dataUrl);
-    const encryptedString = AES.encrypt(this.state.dataUrl, 'secret key 123').toString()
-    const decryptedString = AES.decrypt(encryptedString, 'secret key 123').toString(enc.Utf8)
-    console.log(decryptedString)
-    ipfs.files.add(Buffer(encryptedString), (error, result) => {
-      if (error) {
-        console.log(error);
-        return;
-      }
-      console.log("File added succesfully");
-      console.log("IPFS result", result);
-
-      this.props.storeFileHash(this.props.contract, this.props.myAccountAddress, result[0].hash);
-    });
+    this.props.dealWithDocument(this.props.contract, this.props.myAccountAddress, this.props.doctors)
   };
 
   render() {

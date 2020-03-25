@@ -1,4 +1,4 @@
-const e = require('ethereumjs-util')
+const EthCrypto = require('eth-crypto');
 
 var readline = require('readline');
 var rl = readline.createInterface({
@@ -9,6 +9,5 @@ var rl = readline.createInterface({
 
 
 rl.on('line', function(line){
-    const a = e.privateToPublic(Buffer.from(line, 'hex'))
-    console.log(a.toString('hex'))
+    console.log(EthCrypto.publicKeyByPrivateKey(line))
 })

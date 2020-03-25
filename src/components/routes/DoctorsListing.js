@@ -51,7 +51,10 @@ export class PDoctorsListing extends React.Component {
         return (
             <React.Fragment>
                 <Title> Doctors </Title>
-                <h2 onClick={this.openModal}>Open</h2>
+                <div> 
+                <button className="btn btn-warning" onClick={this.openModal}>Add doctor</button>
+                </div>
+                
                 <Modal
                     isOpen={this.state.modalIsOpen}
                     onRequestClose={this.closeModal}
@@ -64,7 +67,7 @@ export class PDoctorsListing extends React.Component {
                         <input onChange={ this.handleChange }/>
                        
                     </form>
-                    <button onClick={ () => this.props.addDoctor(this.props.contract, this.state.input, this.props.myAccountAddress)}>Add</button>
+                    <button className="btn btn-warning" onClick={ () => this.props.addDoctor(this.props.contract, this.state.input, this.props.myAccountAddress)}>Add</button>
 
                 </Modal>
                 <PageContentLayout isRendering={Object.keys(this.props.doctors).length} unAvailabilityText="No doctors">
