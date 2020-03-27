@@ -1,11 +1,15 @@
 import { createReducer } from '@reduxjs/toolkit'
 
 const initialState = {
-    hash: undefined
+    fileHash: undefined,
+    secretObjectHash: undefined
 }
 
 export const documentStore = createReducer(initialState, {
     STORE_FILE_HASH: (state, action) => {
-        state.hash = action.hash
+        state.fileHash = action.hash
+    },
+    STORE_SECRET_OBJECT_HASH: (state, action) => {
+        state.secretObjectHash = action.hash
     },
 })
