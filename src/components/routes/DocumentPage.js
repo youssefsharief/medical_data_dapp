@@ -1,18 +1,15 @@
 import React, { Component } from "react";
-import { dealWithDocument } from "../../actions";
+import { storeFileHash } from "../../actions";
 import { connect } from 'react-redux';
+import { AES, enc } from 'crypto-js';
+
+const ipfsAPI = require("ipfs-api");
+const ipfs = ipfsAPI("ipfs.infura.io", "5001", { protocol: "https" });
 
 
-const mapStateToProps = state => ({
-  contract: state.ethStore.deployedContract,
-  myAccountAddress: state.ethStore.account,
-  fileHash: state.documentStore.fileHash,
-  doctors: state.doctorsStore.items,
-  myAddress: state.ethStore.account,
-  secretObjectHash: state.documentStore.secretObjectHash
-})
+const mapStateToProps = state => ({ contract: state.ethStore.deployedContract, myAccountAddress: state.ethStore.account, hash: state.documentStore.hash })
 const mapDispatchToProps = dispatch => ({
-  dealWithDocument: (contract, myAccountAddress, doctors, dataUrl) => dispatch(dealWithDocument(contract, myAccountAddress, doctors, dataUrl)),
+  storeFileHash: (contract, myAccountAddress, hash) => dispatch(storeFileHash(contract, myAccountAddress, hash)),
 })
 
 
@@ -24,9 +21,9 @@ export class PDocumentPage extends Component {
     event.preventDefault();
     const file = event.target.files[0];
     const reader = new window.FileReader();
-
+    
     reader.onloadend = () => {
-      this.setState({ dataUrl: reader.result })
+      this.setState({dataUrl: reader.result})
     };
     reader.readAsDataURL(file);
   };
@@ -38,7 +35,19 @@ export class PDocumentPage extends Component {
   onSubmit = event => {
     event.preventDefault();
     console.log('this.state.dataUrl', this.state.dataUrl);
-    this.props.dealWithDocument(this.props.contract, this.props.myAccountAddress, this.props.doctors, this.state.dataUrl)
+    const encryptedString = AES.encrypt(this.state.dataUrl, 'secret key 123').toString()
+    const decryptedString = AES.decrypt(encryptedString, 'secret key 123').toString(enc.Utf8)
+    console.log(decryptedString)
+    ipfs.files.add(Buffer(encryptedString), (error, result) => {
+      if (error) {
+        console.log(error);
+        return;
+      }
+      console.log("File added succesfully");
+      console.log("IPFS result", result);
+
+      this.props.storeFileHash(this.props.contract, this.props.myAccountAddress, result[0].hash);
+    });
   };
 
   render() {
@@ -46,22 +55,12 @@ export class PDocumentPage extends Component {
       <div className="container-fluid mt-5">
         <div className="row">
           <main>
-
-
             <div>
-              <h6> {this.props.fileHash ? 'Yes you have a document saved for yourself' : 'Naa, you do not have a document'}  </h6>
+              <h3> {this.props.hash ? 'Yes you have a document saved for yourself' : 'Naa, you do not have a document'}  </h3>
               <div>
-                {this.props.fileHash && 'URL:    https://ipfs.infura.io/ipfs/' + this.props.fileHash}
+                {this.props.hash && 'URL:    https://ipfs.infura.io/ipfs/' + this.props.hash}
               </div>
             </div>
-
-            <div>
-              <div>
-                {this.props.secretObjectHash && 'Secret Object URL:    https://ipfs.infura.io/ipfs/' + this.props.secretObjectHash}
-              </div>
-            </div>
-
-
             <form onSubmit={this.onSubmit}>
               <div>
                 <label className="mr-2">Upload your medical document:</label>

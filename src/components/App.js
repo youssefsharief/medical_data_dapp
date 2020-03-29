@@ -1,16 +1,15 @@
 import React, { Component } from 'react';
 import './App.css';
-import { BrowserRouter, Route, Redirect } from 'react-router-dom';
+import Addressbar from './Addressbar'
+import { BrowserRouter, Route } from 'react-router-dom';
 import { DoctorsListing } from './routes/DoctorsListing';
 import { connect } from 'react-redux';
 import Web3 from 'web3';
 import Medical from '../abis/Medical'
 import { Navbar } from './layout/Navbar'
-import { getDoctors, getFileHash, amIOwner, getSecretObjectHash } from '../actions';
+import { getDoctors, getFileHash } from '../actions';
 import { DocumentPage } from './routes/DocumentPage';
 import { ErrorModal } from './core/ErrorModal';
-import { IdentityPage } from './routes/IdentityPage';
-import { DocumentForDoctorPage } from './routes/DocumentForDoctor';
 
 
 
@@ -18,10 +17,8 @@ const mapStateToProps = state => ({ account: state.ethStore.account, contract: s
 const mapDispatchToProps = dispatch => ({
   saveAccounts: (payload) => dispatch({ type: 'SAVE_ACCOUNT', payload }),
   getDoctors: (deployedContract, account) => dispatch(getDoctors(deployedContract, account)),
-  amIOwner: (deployedContract, account) => dispatch(amIOwner(deployedContract, account)),
   setEthState: obj => dispatch({type: 'SET_ETH_STATE', payload: obj}),
-  getFileHash: (contract) => dispatch(getFileHash(contract)),
-  getSecretObjectHash:  (contract) => dispatch(getSecretObjectHash(contract)),
+  getFileHash: (contract) => dispatch(getFileHash(contract))
 })
 
 
@@ -56,30 +53,26 @@ class Appa extends Component {
       const deployedContract = new web3.eth.Contract(Medical.abi, networkData.address);
       this.props.setEthState({deployedContract, account: accounts[0]})
       this.props.getDoctors(deployedContract, accounts[0])
-      this.props.amIOwner(deployedContract, accounts[0])
       this.props.getFileHash(this.props.contract)
-      this.props.getSecretObjectHash(this.props.contract)
     } else {
       window.alert('Contract is not found in your blockchain.')
     }
+
+
   }
 
   render() {
     return (
+      
       <BrowserRouter>
-          <Navbar account={this.props.account} />
+          <Navbar />
           <ErrorModal></ErrorModal>
+          <DocumentPage></DocumentPage>
         <div>
+          <Addressbar account={this.props.account} />
         </div>
-        <div className="container">
         <Route path="/doctors" component={DoctorsListing} />
-        <Route path="/document" component={DocumentPage} />
-        <Route path="/identity" component={IdentityPage} />
-        <Route path="/documentForDoctor" component={DocumentForDoctorPage} />
-        <Route path='/'>
-          <Redirect to="/identity" />
-        </Route>
-        </div>
+        {/* <Route path="/documnent" component={DocumentPage} /> */}
       </BrowserRouter>
     );
   }
