@@ -144,7 +144,7 @@ function storeSecretObjectHash(deployedContract, myAccountAddress, hash) {
         try {
             const gasAmount = await deployedContract.methods.storeSecretObjectHash(hash).estimateGas({ from: myAccountAddress })
             await deployedContract.methods.storeSecretObjectHash(hash).send({ gas: gasAmount, from: myAccountAddress })
-            return dispatch({ type: 'SECRET_OBJECT_HASH_STORED', hash })
+            return dispatch({ type: 'STORE_SECRET_OBJECT_HASH', hash })
         } catch (e) {
             return dispatch({ type: 'OPEN_ERROR_MODAL', message: 'Can\'t store your secret object hash in the smart contract' })
         }

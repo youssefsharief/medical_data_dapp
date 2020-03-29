@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { connect } from 'react-redux';
 
 
-const mapStateToProps = state => ({ myAccountAddress: state.ethStore.account, fileHash: state.documentStore.fileHash, doctors: state.doctorsStore.items, secretObjectHash: state.documentStore.secretObjectHash })
+const mapStateToProps = state => ({ fileHash: state.documentStore.fileHash, secretObjectHash: state.documentStore.secretObjectHash })
 const mapDispatchToProps = dispatch => ({
   
 })
