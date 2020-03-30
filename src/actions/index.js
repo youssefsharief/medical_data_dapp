@@ -1,7 +1,7 @@
 import { userType } from '../types/userType';
 import { publicToAddress } from '../services/ethUtils';
-import { AES, enc } from 'crypto-js';
-import * as  EthCrypto from 'eth-crypto';
+import { fetchSecretObject } from '../services/api.service';
+import { encryptSymmtrically, encryptASymmtrically } from '../services/encryption';
 
 const ipfsAPI = require("ipfs-api");
 const ipfs = ipfsAPI("ipfs.infura.io", "5001", { protocol: "https" });
@@ -14,22 +14,15 @@ export function getDoctors(deployedContract, myAccountAddress) {
             for (let i = 0; i < pubKeys.length; i++) {
                 const haveAccess = await deployedContract.methods.doesDoctorHaveAccess(pubKeys[i]).call({ from: myAccountAddress })
                 const doctorAddress = publicToAddress(pubKeys[i])
-                console.log(myAccountAddress)
-                console.log(doctorAddress)
                 doctors[pubKeys[i]] = { haveAccess, address: doctorAddress }
                 if (doctorAddress === myAccountAddress) {
-                    console.log('I am a doctor')
                     dispatch({ type: 'SET_IDENTITY', payload: doctors[pubKeys[i]].haveAccess ? userType.DOCTOR_WITH_ACCESS : userType.DOCTOR_WITHOUT_ACCESS })
-                } else {
-                    console.log('I am not a doctor')
                 }
             }
-            console.log(doctors)
             return dispatch({ type: 'SAVE_DOCTORS', payload: doctors })
         } catch (e) {
             return dispatch({ type: 'OPEN_ERROR_MODAL', message: 'Can\'t get the doctors' })
         }
-
     };
 }
 
@@ -38,9 +31,7 @@ export function amIOwner(deployedContract, myAccountAddress) {
     return async function (dispatch) {
         try {
             const isOwner = await deployedContract.methods.amIOwner().call({ from: myAccountAddress })
-            console.log('isOwner', isOwner)
             if (isOwner) {
-                console.log('looks like I am the owner')
                 dispatch({ type: 'SET_IDENTITY', payload: userType.OWNER })
             }
         } catch (e) {
@@ -89,12 +80,8 @@ export function revokeAccess(deployedContract, doctorPubKey, myAccountAddress) {
 
 export function dealWithDocument(deployedContract, myAccountAddress, doctors, dataUrl) {
     return async function (dispatch) {
-        console.log(doctors)
-        const secretKey = Math.random().toString(36).substring(10)
-        console.log('random', secretKey)
-        const encryptedFileAsString = AES.encrypt(dataUrl, secretKey).toString()
-        // const decryptedString = AES.decrypt(encryptedFileAsString, secretKey).toString(enc.Utf8)
-        // console.log(decryptedString)
+        const secretKey = Math.random().toString(36).substring(2)
+        const encryptedFileAsString = encryptSymmtrically(dataUrl, secretKey)
         ipfs.files.add(Buffer(encryptedFileAsString), (error, result) => {
             if (error) {
                 console.log(error);
@@ -104,14 +91,14 @@ export function dealWithDocument(deployedContract, myAccountAddress, doctors, da
             console.log("IPFS result", result);
             dispatch(storeFileHash(deployedContract, myAccountAddress, result[0].hash));
         });
-        
-        const ecryptedSecretsArr = await Promise.all(Object.keys(doctors).map(async publicKey => EthCrypto.encryptWithPublicKey(publicKey, secretKey)))
-        const secretKeys = Object.keys(doctors).reduce((obj, k, i) => ({...obj, [k]: ecryptedSecretsArr[i] }), {})
+
+        const ecryptedSecretsArr = await Promise.all(Object.keys(doctors).map(async publicKey => encryptASymmtrically(publicKey, secretKey)))
+        const secretKeys = Object.keys(doctors).reduce((obj, k, i) => ({ ...obj, [k]: ecryptedSecretsArr[i] }), {})
 
         console.log('resolved', ecryptedSecretsArr)
         console.log('secret keys', secretKeys)
 
-        
+
         const stringifiedSecretKeys = JSON.stringify(secretKeys)
         console.log('stringifiedSecretKeys', stringifiedSecretKeys)
         ipfs.files.add(Buffer(stringifiedSecretKeys), (error, result) => {
@@ -176,3 +163,29 @@ export function getSecretObjectHash(deployedContract) {
         }
     };
 }
+
+export function showMyEncryptedSecret(hash, myAccountAddress) {
+    return async function (dispatch) {
+        try {
+            const secretObject = await fetchSecretObject(hash)
+            const myEncryptedSecret = getMyEncryptedSecret(myAccountAddress, secretObject)
+            if (myEncryptedSecret) {
+                dispatch({ type: 'STORE_ENCRYPTED_SECRET_KEY', payload: JSON.stringify(myEncryptedSecret) })
+            }
+        } catch (e) {
+            return dispatch({ type: 'OPEN_ERROR_MODAL', message: 'Can\'t get your secret object hash' })
+        }
+    };
+}
+
+
+
+
+function getMyEncryptedSecret(myAccountAddress, secretObject) {
+    for (const key in secretObject) {
+        if (publicToAddress(key) === myAccountAddress) {
+            return secretObject[key]
+        }
+    }
+}
+

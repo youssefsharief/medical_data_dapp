@@ -31,10 +31,6 @@ export class PDocumentPage extends Component {
     reader.readAsDataURL(file);
   };
 
-  // decrypt = (encrypted) => {
-  //   const dataUrl = 
-  // }
-
   onSubmit = event => {
     event.preventDefault();
     console.log('this.state.dataUrl', this.state.dataUrl);
@@ -66,7 +62,7 @@ export class PDocumentPage extends Component {
               <div>
                 <label className="mr-2">Upload your medical document:</label>
                 <input type="file" onChange={this.captureFile} />
-                <input type="submit" />
+                <input class="btn btn-warning" type="submit" />
               </div>
             </form>
           </main>

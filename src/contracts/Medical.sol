@@ -13,24 +13,32 @@ contract Medical{
         return doctorsPubKeys;
     }
 
-    function grantAccessToDoctor ( string memory a ) public isOwner() {
-        doesDoctorHaveAccess[a] = true;
+    function grantAccessToDoctor( string memory publicKey )  public isOwner() publickKeyProvided(publicKey) {
+        doesDoctorHaveAccess[publicKey] = true;
+        resetDocument();
     }
 
     function amIOwner() public view returns(bool) {
         return msg.sender == owner;
     }
 
-    function revokeAccessFromDoctor ( string memory a )  public isOwner() {
-        doesDoctorHaveAccess[a] = false;
+    function revokeAccessFromDoctor ( string memory publicKey )  public isOwner() publickKeyProvided(publicKey){
+        doesDoctorHaveAccess[publicKey] = false;
+        resetDocument();
     }
 
-    function storeFileHash ( string memory a )  public isOwner(){
-        fileHash = a;
+    function resetDocument() private {
+        fileHash = '';
+        secretObjectHash = '';
     }
 
-    function storeSecretObjectHash ( string memory a )  public isOwner(){
-        secretObjectHash = a;
+    function storeFileHash ( string memory str )  public isOwner() hashProvided(str){
+        require(bytes(str).length > 0, 'You need to  provide a hash for the file');
+        fileHash = str;
+    }
+
+    function storeSecretObjectHash ( string memory str )  public isOwner() hashProvided(str){
+        secretObjectHash = str;
     }
 
     function getFileHash () public isOwner() view  returns(string memory) {
@@ -41,9 +49,10 @@ contract Medical{
         return secretObjectHash;
     }
 
-    function registerDoctor ( string memory a   )  public isOwner(){
-        doctorsPubKeys.push(a);
-        doesDoctorHaveAccess[a] = false;
+    function registerDoctor ( string memory publicKey   )  public isOwner() {
+        require(bytes(publicKey).length > 0, 'You need to  provide a public key');
+        doctorsPubKeys.push(publicKey);
+        doesDoctorHaveAccess[publicKey] = false;
     }
 
     modifier userExists(address _userId) {
@@ -51,13 +60,18 @@ contract Medical{
         _;
     }
 
-    modifier isOwner() {
-        require(msg.sender == owner, 'You are not the owner of this contract');
+    modifier publickKeyProvided(string memory str) {
+        require (bytes(str).length > 0, 'You need to provide a publick key');
         _;
     }
 
-    modifier reject() {
-        require(true == false, 'Not reasonable');
+    modifier hashProvided(string memory str) {
+        require (bytes(str).length > 0, 'You need to provide a hash');
+        _;
+    }
+
+    modifier isOwner() {
+        require(msg.sender == owner, 'You are not the owner of this contract');
         _;
     }
 

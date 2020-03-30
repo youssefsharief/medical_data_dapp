@@ -1,6 +1,7 @@
 import React from "react";
 import Modal from 'react-modal';
 import { connect } from 'react-redux';
+import { ModalCLoseButton } from "./ModalCloseButton";
 
 const customStyles = {
     content: {
@@ -23,16 +24,17 @@ export function PErrorModal({onCloseClick, modalErrorMesasge}) {
     return (
     
     <Modal
+        ariaHideApp={false}
         isOpen={modalErrorMesasge ? true : false}
         onRequestClose={onCloseClick}
         style={customStyles}
         contentLabel="Error Modal"
-
     >
-        <button className="btn btn-warning" onClick={onCloseClick}>close</button>
+        <ModalCLoseButton onClick={onCloseClick} />
         
-        <p>{modalErrorMesasge}</p>
-
+        <div> 
+            <p>{modalErrorMesasge}</p>
+        </div>
     </Modal>
     )
 

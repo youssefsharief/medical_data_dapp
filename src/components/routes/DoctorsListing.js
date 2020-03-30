@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import { PageContentLayout } from '../layout/PageContentLayout';
 import Modal from 'react-modal';
 import { addDoctor, giveAccess, revokeAccess } from '../../actions';
+import { ModalCLoseButton } from '../core/ModalCloseButton';
 
 
 const mapStateToProps = state => ({ doctors: state.doctorsStore.items, contract: state.ethStore.deployedContract, myAccountAddress: state.ethStore.account })
@@ -62,12 +63,12 @@ export class PDoctorsListing extends React.Component {
                     contentLabel="Example Modal"
 
                 >
-                    <button onClick={this.closeModal}>close</button>
-                    <form>
-                        <input onChange={ this.handleChange }/>
+                    <ModalCLoseButton onClick={this.closeModal} />
+                    <form className="mt-10">
+                        <input className="form-control" onChange={ this.handleChange } placeholder="Enter doctor's public key"/>
                        
                     </form>
-                    <button className="btn btn-warning" onClick={ () => this.props.addDoctor(this.props.contract, this.state.input, this.props.myAccountAddress)}>Add</button>
+                    <button className="btn btn-warning mt-10" onClick={ () => this.props.addDoctor(this.props.contract, this.state.input, this.props.myAccountAddress)}>Add</button>
 
                 </Modal>
                 <PageContentLayout isRendering={Object.keys(this.props.doctors).length} unAvailabilityText="No doctors">

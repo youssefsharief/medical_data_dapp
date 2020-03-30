@@ -8,28 +8,28 @@ export const DoctorsTable = ({ doctors, onGrantClick, onRevokeClick }) => (
             <React.Fragment>
                 <th>Public Key</th>
                 <th>Address</th>
-                <th>Access</th>
+                <th>Grant or Revoke Access</th>
             </React.Fragment>
         }
 
 
         TableBodyContent={() => Object.keys(doctors).map((pubKey, index) =>
             (
-                <tr key={index}>
+                <tr key={index} style={{
+                    background: doctors[pubKey].haveAccess ? 'lightgreen' : 'initial'
+                }
+                    
+                }>
                     <td>{pubKey}</td>
                     <td>{doctors[pubKey].address}</td>
 
 
-                    <td className="text-center ">
+                    <td>
                         {
                             doctors[pubKey].haveAccess ?
-                                <button className="link" onClick={() => onRevokeClick(pubKey)}>
-                                    <i className="fa fa-thumbs-down text-danger"> </i>
-                                </button>
+                                <button  onClick={() => onRevokeClick(pubKey)} className="btn btn-warning"> Revoke Access </button>
                                 :
-                                <button className="link" onClick={() => onGrantClick(pubKey)}>
-                                    <i className="fa fa-thumbs-down text-success"> </i>
-                                </button>
+                                <button  onClick={() => onGrantClick(pubKey)} className="btn btn-warning"> Grant Access </button>
                         }
                     </td>
 

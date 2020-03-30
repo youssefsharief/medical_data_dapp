@@ -2,7 +2,8 @@ import { createReducer } from '@reduxjs/toolkit'
 
 const initialState = {
     fileHash: undefined,
-    secretObjectHash: undefined
+    secretObjectHash: undefined,
+    myEncryptedSecretKey: undefined
 }
 
 export const documentStore = createReducer(initialState, {
@@ -11,5 +12,8 @@ export const documentStore = createReducer(initialState, {
     },
     STORE_SECRET_OBJECT_HASH: (state, action) => {
         state.secretObjectHash = action.hash
+    },
+    STORE_ENCRYPTED_SECRET_KEY: (state, action) => {
+        state.myEncryptedSecretKey = action.payload
     },
 })
