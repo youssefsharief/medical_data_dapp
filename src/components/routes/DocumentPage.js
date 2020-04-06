@@ -62,7 +62,7 @@ export class PDocumentPage extends Component {
               <div>
                 <label className="mr-2">Upload your medical document:</label>
                 <input type="file" onChange={this.captureFile} />
-                <input class="btn btn-warning" type="submit" />
+                <input className="btn btn-warning" type="submit" />
               </div>
             </form>
           </main>
