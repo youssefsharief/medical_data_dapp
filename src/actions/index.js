@@ -58,7 +58,8 @@ export function giveAccess(deployedContract, doctorPubKey, myAccountAddress) {
         try {
             const gasAmount = await deployedContract.methods.grantAccessToDoctor(doctorPubKey).estimateGas({ from: myAccountAddress })
             await deployedContract.methods.grantAccessToDoctor(doctorPubKey).send({ gas: gasAmount, from: myAccountAddress })
-            return dispatch({ type: 'GIVE_ACCESS', pubKey: doctorPubKey })
+            dispatch({ type: 'GIVE_ACCESS', pubKey: doctorPubKey })
+            return  dispatch({ type: 'RESET_DOCUMENT_STORE' })
         } catch (e) {
             return dispatch({ type: 'OPEN_ERROR_MODAL', message: 'Can\'t give access to a doctor. Make sure you are the owner of the contract' })
         }
@@ -70,7 +71,8 @@ export function revokeAccess(deployedContract, doctorPubKey, myAccountAddress) {
         try {
             const gasAmount = await deployedContract.methods.revokeAccessFromDoctor(doctorPubKey).estimateGas({ from: myAccountAddress })
             await deployedContract.methods.revokeAccessFromDoctor(doctorPubKey).send({ gas: gasAmount, from: myAccountAddress })
-            return dispatch({ type: 'REVOKE_ACCESS', pubKey: doctorPubKey })
+            dispatch({ type: 'REVOKE_ACCESS', pubKey: doctorPubKey })
+            return  dispatch({ type: 'RESET_DOCUMENT_STORE' })
         } catch (e) {
             return dispatch({ type: 'OPEN_ERROR_MODAL', message: 'Can\'t revoke access from a doctor. Make sure you are the owner of the contract' })
         }

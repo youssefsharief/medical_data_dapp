@@ -16,4 +16,9 @@ export const documentStore = createReducer(initialState, {
     STORE_ENCRYPTED_SECRET_KEY: (state, action) => {
         state.myEncryptedSecretKey = action.payload
     },
+    RESET_DOCUMENT_STORE: (state, action) => {
+        state.fileHash = undefined
+        state.secretObjectHash = undefined
+        state.myEncryptedSecretKey = undefined
+    },
 })
